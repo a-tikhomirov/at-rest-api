@@ -109,9 +109,7 @@ public class ResponseSteps {
             }
         }
         if (!errorMessage.toString().isEmpty()) {
-            log.error(errorMessage.toString());
-            coreScenario.getScenario().attach(errorMessage.toString(), "text/plain", "error message");
-            fail(errorMessage.toString());
+            attachErrorMessage(errorMessage.toString());
         }
     }
 
@@ -152,34 +150,50 @@ public class ResponseSteps {
      * @return                  содержимое элемента части Response
      */
     private String getResponseElementValue(Response response, ResponsePart responsePart, String key) {
-        String value;
-        switch (responsePart) {
-            case STATUS:
-                if (key.equals("message")) {
-                    value = response.getStatusLine();
-                } else if (key.equals("code")) {
-                    value = String.valueOf(response.getStatusCode());
-                } else {
-                    throw new IllegalArgumentException(format("Неверно задан элемент для проверка STATUS: %s\nВозможные варианты: [message, code]", key));
+        String value = null;
+        String errorMessage = "Ошибка: в части ответа %s не найден элемент с ключом %s";
+        try {
+            switch (responsePart) {
+                case STATUS:
+                    if (key.equals("message")) {
+                        value = response.getStatusLine();
+                    } else if (key.equals("code")) {
+                        value = String.valueOf(response.getStatusCode());
+                    } else {
+                        throw new IllegalArgumentException(format("Неверно задан элемент для проверка STATUS: %s\nВозможные варианты: [message, code]", key));
+                    }
+                    break;
+                case HEADER: {
+                    value = response.getHeader(key);
+                    break;
                 }
-                break;
-            case HEADER: {
-                value = response.getHeader(key);
-                break;
+                case BODY_JSON: {
+                    value = response.getBody().jsonPath().get(key);
+                    break;
+                }
+                case BODY_HTML: {
+                    value = response.htmlPath().getString(key);
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException(format("Не задано поведение для части ответа %s", responsePart));
+                }
             }
-            case BODY_JSON: {
-                value = response.getBody().jsonPath().get(key).toString();
-                break;
-            }
-            case BODY_HTML: {
-                value = response.htmlPath().getString(key);
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException(format("Не задано поведение для части ответа %s", responsePart));
-            }
+        } catch (NullPointerException e) {
+            attachErrorMessage(format(errorMessage, responsePart, key));
         }
         return value;
+    }
+
+    /**
+     * Выводит в лог сообщение об ошибке и прикрепляет сообщение к шагу в отчете allure
+     *
+     * @param message           сообщение об ошибке
+     */
+    private void attachErrorMessage(String message) {
+        log.error(message);
+        coreScenario.getScenario().attach(message, "text/plain", "error message");
+        fail(message);
     }
 
     /**

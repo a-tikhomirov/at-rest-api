@@ -2,6 +2,7 @@
 @imgur
 @image
 @negative
+@Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 Функционал: [Image Upload]
 
   Структура сценария: Загрузка изображения размер которого превышает 10Mb
@@ -16,6 +17,6 @@
 
     Примеры:
       | image-type  | image-source              |
-      | BASE64_FILE | images/testImageGt10.jpg  |
       | FILE        | images/testImageGt10.jpg  |
+      | BASE64_FILE | images/testImageGt10.jpg  |
       | MULTIPART   | image.url.gt10            |

@@ -5,10 +5,11 @@
 @Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 Функционал: [Image Upload]
 
-  Структура сценария: Загрузка изображения размер которого не превышает 10Mb
+  Структура сценария: Загрузка изображения размер которого не превышает 10Mb с указанием корректного значения параметра "type"
     Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
       | ACCESS_TOKEN  | Authorization | imgur.api.bearer  |
       | <image-type>  | image         | <image-source>    |
+      | MULTIPART     | type          | <type>            |
     Затем выполнено сохранение элементов Response из переменной "imageUploadResponse" в соответствии с таблицей
       | BODY_JSON | data.id         | imageHash |
       | BODY_JSON | data.deletehash | hash      |
@@ -29,7 +30,7 @@
       | BODY_JSON | status  | == | 200              |
 
     Примеры:
-      | image-type  | image-source              |
-      | FILE        | images/testImageLt10.jpg  |
-      | BASE64_FILE | images/testImageLt10.jpg  |
-      | MULTIPART   | image.url.lt10            |
+      | image-type  | image-source              | type    |
+      | FILE        | images/testImageLt10.jpg  | file    |
+      | BASE64_FILE | images/testImageLt10.jpg  | base64  |
+      | MULTIPART   | image.url.lt10            | URL     |

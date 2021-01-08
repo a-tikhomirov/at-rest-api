@@ -5,17 +5,13 @@
         <Property name="filePattern">logs/%d{dd-MM-yyyy HH-mm}.log.gz</Property>
         <Property name="splitFileName">logs/$${ctx:featureId}/$${ctx:startDateTime}/$${ctx:testId}.log</Property>
         <Property name="logLineStart">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p</Property>
-        <Property name="logLineEnd">%maxLen{%m%notEmpty{ =>%ex{short}}}{1000}%n</Property>
+        <Property name="logLineEnd">%maxLen{%m%notEmpty{ =>%ex{short}}}{1200}%n</Property>
         <Property name="logPatternConsole">${logLineStart} [%C{10}] : ${logLineEnd}</Property>
         <Property name="logPatternConsoleSplit">${logLineStart} : ${logLineEnd}</Property>
-        <Property name="logPatternConsoleShort">%maxLen{%m%notEmpty{ =>%ex{short}}}{250}%n</Property>
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${logPatternConsole}"/>
-        </Console>
-        <Console name="ConsoleShort" target="SYSTEM_OUT">
-            <PatternLayout pattern="${logPatternConsoleShort}"/>
         </Console>
         <RollingRandomAccessFile name="File" fileName="${fileName}"
                                  filePattern="${filePattern}">
@@ -25,18 +21,10 @@
                 <OnStartupTriggeringPolicy/>
             </Policies>
         </RollingRandomAccessFile>
-        <RollingRandomAccessFile name="FileShort" fileName="${fileName}"
-                                 filePattern="${filePattern}">
-            <PatternLayout charset="UTF-8" pattern="${logPatternConsoleShort}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <OnStartupTriggeringPolicy/>
-            </Policies>
-        </RollingRandomAccessFile>
         <Routing name="splitAppender">
             <Routes pattern="$${ctx:testId}">
                 <Route>
-                    <File name="splitAppender-${ctx:testId}" fileName="${splitFileName}" locking="true">
+                    <File name="splitAppender-${ctx:testId}" fileName="${splitFileName}">
                         <PatternLayout charset="UTF-8" pattern="${logPatternConsoleSplit}"/>
                     </File>
                 </Route>
@@ -44,18 +32,6 @@
         </Routing>
         <Async name="Async">
             <AppenderRef ref="splitAppender" level="info" />
-        </Async>
-        <Routing name="splitAppenderShort">
-            <Routes pattern="$${ctx:testId}">
-                <Route>
-                    <File name="splitAppenderShort-${ctx:testId}" fileName="${splitFileName}">
-                        <PatternLayout charset="UTF-8" pattern="${logPatternConsoleShort}"/>
-                    </File>
-                </Route>
-            </Routes>
-        </Routing>
-        <Async name="AsyncShort">
-            <AppenderRef ref="splitAppenderShort" level="info" />
         </Async>
     </Appenders>
     <Loggers>
@@ -67,11 +43,6 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
             <AppenderRef ref="Async"/>
-        </Logger>
-        <Logger name="ru.at.rest.api.setup.RestAssuredLoggerSetup" level="INFO" additivity="false">
-            <AppenderRef ref="ConsoleShort"/>
-            <AppenderRef ref="FileShort"/>
-            <AppenderRef ref="AsyncShort"/>
         </Logger>
     </Loggers>
 </Configuration>
