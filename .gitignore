@@ -1,0 +1,6 @@
+.allure
+.idea
+allure-results
+logs
+target
+at-rest-api.iml
