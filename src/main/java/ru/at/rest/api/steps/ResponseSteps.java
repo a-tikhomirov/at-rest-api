@@ -87,7 +87,7 @@ public class ResponseSteps {
         log.info(format("Проверка ответа Response на соответствие таблице:\n%s", dataTable));
         StringBuilder errorMessage = new StringBuilder();
         String actualValue;
-        String assertionMessage = "\nФактическое %s: [%s] не соответствует выражению [%s] для ожидаемого значения [%s]";
+        String assertionMessage = "\nФактическое %s: [%s] = [%s] не соответствует выражению [%s] для ожидаемого значения [%s]";
         if (dataTable.isEmpty()) {
             errorMessage.append("Отсутсвуют данные для проверки Response");
         }
@@ -101,7 +101,7 @@ public class ResponseSteps {
             Function<String, Matcher> matcher = defineOperation(operation);
             try {
                 actualValue = getResponseElementValue(response, responsePart, key);
-                assertThat(format(assertionMessage, responsePart.getName(), actualValue, operation, expectedValue), actualValue, matcher.apply(expectedValue));
+                assertThat(format(assertionMessage, responsePart.getName(), key, actualValue, operation, expectedValue), actualValue, matcher.apply(expectedValue));
                 log.info("--------------------------PASS--------------------------\n");
             } catch (AssertionError e) {
                 log.info("--------------------------FAIL--------------------------\n");
@@ -168,7 +168,9 @@ public class ResponseSteps {
                     break;
                 }
                 case BODY_JSON: {
-                    value = response.getBody().jsonPath().get(key);
+                    if (response.getBody().jsonPath().get(key) != null) {
+                        value = response.getBody().jsonPath().get(key).toString();
+                    }
                     break;
                 }
                 case BODY_HTML: {
@@ -179,7 +181,7 @@ public class ResponseSteps {
                     throw new IllegalArgumentException(format("Не задано поведение для части ответа %s", responsePart));
                 }
             }
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException e) {
             attachErrorMessage(format(errorMessage, responsePart, key));
         }
         return value;
@@ -199,6 +201,7 @@ public class ResponseSteps {
     /**
      * Определение Hamcrest-матчера по оператору сравнения:
      * '==' - равенство, '!=' - неравенство, '~' - соответствие регулярному выражению, '!~' - несоответствие регулярному выражению
+     * 'null' - проверка на null, 'not null' - проверка на not(null)
      *
      * @param operation         тип операции {@link OperationType}
      * @return                  Hamcrest-матчер для проверки
@@ -217,6 +220,12 @@ public class ResponseSteps {
                 break;
             case NOT_MATCH:
                 matcher = s -> not(matchesPattern(s));
+                break;
+            case NULL:
+                matcher = s -> is(nullValue());
+                break;
+            case NOT_NULL:
+                matcher = s -> is(notNullValue());
                 break;
             default:
                 throw new IllegalArgumentException("Не задано поведение для операции: " + operation);
@@ -247,7 +256,9 @@ public class ResponseSteps {
         EQUAL("=="),
         NOT_EQUAL("!="),
         MATCH("~"),
-        NOT_MATCH("!~");
+        NOT_MATCH("!~"),
+        NULL("null"),
+        NOT_NULL("not null");
 
         @Getter
         private final String value;

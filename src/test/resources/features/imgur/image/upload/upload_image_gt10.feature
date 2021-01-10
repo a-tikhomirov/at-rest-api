@@ -1,6 +1,7 @@
 # language: ru
 @imgur
 @image
+@upload
 @negative
 @Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 Функционал: [Image Upload]

@@ -26,6 +26,9 @@ public class ScopedVariables {
      * @return                  новая строка
      */
     public static String resolveVars(String inputString) {
+        if (inputString == null || inputString.isEmpty()) {
+            return inputString;
+        }
         log.info(format("Проверка строки %s на возможность подстановки параметров", inputString));
         Pattern p = Pattern.compile(CURVE_BRACES_PATTERN);
         Matcher m = p.matcher(inputString);

@@ -1,12 +1,13 @@
 # language: ru
 @imgur
 @image
+@upload
 @negative
 @Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 @Issue=https://link.to.issue.here
 Функционал: [Image Upload]
 
-  Структура сценария: Загрузка изображения размер которого не превышает 10Mb из base64-файла и указанием некорректного значения параметра "type"
+  Структура сценария: Загрузка изображения из base64-файла c указанием некорректного значения параметра "type"
     Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
       | ACCESS_TOKEN  | Authorization | imgur.api.bearer          |
       | BASE64_FILE   | image         | images/testImageLt10.jpg  |

@@ -62,6 +62,9 @@ public class PropertyLoader {
      * @return              значение системного свойства/property свойства/переменной сценария/значение по умолчанию
      */
     public static String loadValuePropertyOrVariableOrDefault(String valueToFind) {
+        if (valueToFind == null || valueToFind.isEmpty()) {
+            return valueToFind;
+        }
         String resultValue = tryLoadProperty(valueToFind);
         if (resultValue != null) {
             log.info("Значение переменной: " + valueToFind + " из " + PROPERTIES_FILE + " = " + resultValue);
