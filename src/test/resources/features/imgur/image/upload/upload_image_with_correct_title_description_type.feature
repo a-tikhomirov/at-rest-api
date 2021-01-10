@@ -12,10 +12,11 @@
     И выполнена генерация 128 случайных EN символов и результат сохранен в переменную "seq128Chars"
     И выполнена генерация 256 случайных EN символов и результат сохранен в переменную "seq256Chars"
 
-  Структура сценария: Загрузка изображения с указанием корректных значений параметров "title" и "description"
+  Структура сценария: Загрузка изображения с указанием корректных значений параметров "title", "description" и "type"
     Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
       | ACCESS_TOKEN  | Authorization | imgur.api.bearer  |
       | <image-type>  | image         | <image-source>    |
+      | MULTIPART     | type          | <type>            |
       | MULTIPART     | title         | <title>           |
       | MULTIPART     | description   | <description>     |
     Затем выполнено сохранение элементов Response из переменной "imageUploadResponse" в соответствии с таблицей
@@ -52,9 +53,9 @@
       | BODY_JSON | status  | == | 200              |
 
     Примеры:
-      | image-type  | image-source              | title               | description         |
-      | FILE        | images/testImageLt10.jpg  | oneCharString       | text.special.chars  |
-      | FILE        | images/testImageLt10.jpg  | oneWordString       | seq256Chars         |
-      | BASE64_FILE | images/testImageLt10.jpg  | text.phrase.en      | text.phrase.en      |
-      | BASE64_FILE | images/testImageLt10.jpg  | seq128Chars         | oneWordString       |
-      | MULTIPART   | image.url.lt10            | text.special.chars  | oneCharString       |
+      | image-type  | image-source              | title               | description         | type    |
+      | FILE        | images/testImageLt10.jpg  | oneCharString       | text.special.chars  | file    |
+      | FILE        | images/testImageLt10.jpg  | oneWordString       | seq256Chars         | file    |
+      | BASE64_FILE | images/testImageLt10.jpg  | text.phrase.en      | text.phrase.en      | base64  |
+      | BASE64_FILE | images/testImageLt10.jpg  | seq128Chars         | oneWordString       | base64  |
+      | MULTIPART   | image.url.lt10            | text.special.chars  | oneCharString       | URL     |

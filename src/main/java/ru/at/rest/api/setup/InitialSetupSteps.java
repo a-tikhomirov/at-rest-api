@@ -50,14 +50,14 @@ public class InitialSetupSteps {
     public void attachLogs(Scenario scenario) throws InterruptedException {
         log.info(String.format("%s: завершение сценария с именем [%s]\n", coreScenario.getScenarioId(), scenario.getName()));
         coreScenario.getScenario().attach(readFile(this.getScenarioLogPath(), StandardCharsets.UTF_8), "text/plain", "test log");
-        Thread.sleep(Integer.parseInt(System.getProperty("delay", "10000")));
+        Thread.sleep(Integer.parseInt(System.getProperty("delay", "5000")));
     }
 
     private String getScenarioLogPath() {
         return String.format("%s/logs/%s/%s/%s.log",
                 Paths.get("").toFile().getAbsolutePath(),
-                coreScenario.getScenarioPath(),
                 startDateTime,
+                coreScenario.getScenarioPath(),
                 coreScenario.getScenarioId());
     }
 

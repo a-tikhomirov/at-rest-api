@@ -3,7 +3,7 @@
     <Properties>
         <Property name="fileName">logs/test_log.log</Property>
         <Property name="filePattern">logs/%d{dd-MM-yyyy HH-mm}.log.gz</Property>
-        <Property name="splitFileName">logs/$${ctx:featureId}/$${ctx:startDateTime}/$${ctx:testId}.log</Property>
+        <Property name="splitFileName">logs/$${ctx:startDateTime}/$${ctx:featureId}/$${ctx:testId}.log</Property>
         <Property name="logLineStart">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p</Property>
         <Property name="logLineEnd">%maxLen{%m%notEmpty{ =>%ex{short}}}{1400}%n</Property>
         <Property name="logPatternConsole">${logLineStart} [%C{10}] : ${logLineEnd}</Property>
