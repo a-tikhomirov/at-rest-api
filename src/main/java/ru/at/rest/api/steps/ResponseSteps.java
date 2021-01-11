@@ -33,12 +33,12 @@ public class ResponseSteps {
      *
      * @param responseVarName      имя переменной, в которой хранится Response
      * @param dataTable            Таблица условий проверки.
-     *                             Формат таблицы смотреть описании метода {@link #checkResponse(Response, DataTable) checkResponse}
+     *                             Формат таблицы смотреть описании метода {@link #checkResponse(Response, String, DataTable) checkResponse}
      */
     @И("ответ Response из переменной {string} соответствует условиям из таблицы")
     public void checkResponseElements(String responseVarName, DataTable dataTable) {
         Response response = tryGetResponseFromVar(responseVarName);
-        checkResponse(response, dataTable);
+        checkResponse(response, responseVarName, dataTable);
     }
 
     /**
@@ -46,12 +46,12 @@ public class ResponseSteps {
      *
      * @param responseVarName      имя переменной, в которой хранится Response
      * @param dataTable            Таблица с указанием элементов Response для сохранения и названиями переменных.
-     *                             Формат таблицы смотреть описании метода {@link #saveResponse(Response, DataTable) saveResponse}
+     *                             Формат таблицы смотреть описании метода {@link #saveResponse(Response, String, DataTable) saveResponse}
      */
     @И("выполнено сохранение элементов Response из переменной {string} в соответствии с таблицей")
     public void saveResponseElementsToVars(String responseVarName, DataTable dataTable) {
         Response response = tryGetResponseFromVar(responseVarName);
-        saveResponse(response, dataTable);
+        saveResponse(response, responseVarName, dataTable);
     }
 
     /**
@@ -73,6 +73,7 @@ public class ResponseSteps {
      * Проверка Response на соответствие условиям из таблицы
      *
      * @param response          объект класса Response для проверки
+     * @param responseName      имя ответа Response для отображения в логе
      * @param dataTable         Таблица условий проверки в формате:
      *                          | <часть Response для проверки> | <элемент для проверки> | <операция проверки> | <ожидаемое значение> |
      *                          ...
@@ -83,8 +84,8 @@ public class ResponseSteps {
      *                          <ожидаемое значение> может быть задано как непосредственно значение для проверки или как имя для значения в property файле/в хранилище переменных
      *                          В элементе <ожидаемое значение> возможно использовать параметризацию, см. в {@link ru.at.rest.api.cucumber.ScopedVariables#resolveVars(String) resolveVars}
      */
-    private void checkResponse(Response response, DataTable dataTable) {
-        log.info(format("Проверка ответа Response на соответствие таблице:\n%s", dataTable));
+    private void checkResponse(Response response, String responseName, DataTable dataTable) {
+        log.info(format("Проверка ответа %s на соответствие таблице:\n%s", responseName, dataTable));
         StringBuilder errorMessage = new StringBuilder();
         String actualValue;
         String assertionMessage = "\nФактическое %s: [%s] = [%s] не соответствует выражению [%s] для ожидаемого значения [%s]";
@@ -96,7 +97,7 @@ public class ResponseSteps {
             String key = responseParam.get(1);
             OperationType operation = OperationType.get(responseParam.get(2));
             String expectedValue = resolveVars(loadValuePropertyOrVariableOrDefault(responseParam.get(3)));
-            log.info(format("Проверка Response: [%s]:[%s] [%s] [%s]", responsePart, key, operation, expectedValue));
+            log.info(format("Проверка %s: [%s]:[%s] [%s] [%s]", responseName, responsePart, key, operation, expectedValue));
 
             Function<String, Matcher> matcher = defineOperation(operation);
             try {
@@ -117,6 +118,7 @@ public class ResponseSteps {
      * Сохранение отдельных элементов Response в заданные переменные в соответствие с таблицей
      *
      * @param response          объект класса Response для проверки
+     * @param responseName      имя ответа Response для отображения в логе
      * @param dataTable         Таблица с указанием элементов Response для сохранения и названиями переменных в формате:
      *                          | <часть Response> | <элемент для сохранения> | <имя переменной> |
      *                          ...
@@ -124,8 +126,8 @@ public class ResponseSteps {
      *                          возможные значения <часть Response> cм. {@link ResponsePart}
      *                          возможные значения <элемент для сохранения> зависят от указанной части Response
      */
-    private void saveResponse(Response response, DataTable dataTable) {
-        log.info(format("Сохранение элементов ответа Response в переменные в соответствии таблицей:\n%s", dataTable));
+    private void saveResponse(Response response, String responseName, DataTable dataTable) {
+        log.info(format("Сохранение элементов ответа %s в переменные в соответствии таблицей:\n%s", responseName, dataTable));
         String value;
         if (dataTable.isEmpty()) {
             throw new IllegalArgumentException("Отсутсвуют данные для сохранения элементов Response");

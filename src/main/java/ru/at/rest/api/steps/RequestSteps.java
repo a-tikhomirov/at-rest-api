@@ -60,6 +60,7 @@ public class RequestSteps {
                                             DataTable dataTable) {
         Response response = sendRequest(method, address, dataTable);
         coreScenario.setVar(responseNameVariable, response);
+        log.info("Ответ сохранен в переменную с именем: " + responseNameVariable);
     }
 
     /**
