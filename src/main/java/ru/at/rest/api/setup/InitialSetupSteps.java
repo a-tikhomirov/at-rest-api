@@ -23,11 +23,6 @@ public class InitialSetupSteps {
     @Delegate
     CoreScenario coreScenario = CoreScenario.getInstance();
 
-    /**
-     * Действия выполняемые перед каждым сценарием
-     * Включение слушателей Allure
-     * Создает окружение(среду) для запуска сценария
-     */
     @Before()
     public void initTest(Scenario scenario) {
         coreScenario.setEnvironment(new CoreEnvironment(scenario));
