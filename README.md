@@ -85,13 +85,14 @@ BODY_JSON   | status        | == | int      | 200
 <a name="Скачивание-и-запуск-проекта"></a>
 Возможно скачать архив или клонировать проект при наличии git.
 
-[Ссылка на скачивание архива](https://github.com/a-tikhomirov/at-rest-api/archive/master.zip)
+[Ссылка на скачивание архива](https://github.com/a-tikhomirov/at-rest-api/archive/lesson4-hw.zip)
 
 Команда для клонирования проекта:
 
 ```
 $ git clone https://github.com/a-tikhomirov/at-rest-api.git
 $ cd at-rest-api/
+$ git checkout lesson4-hw
 ```
 
 Для запуска тестового набора *image* необходимо в командной строке перейти в директорию проекта и выполнить команду:
@@ -137,17 +138,22 @@ mvn clean test -Dcucumber.filter.tags=@tag_to_run allure:serve
 <a name="Информация-по-отчету-Allure"></a>
 Для просмотра отчета по результатам прохождения тестов используется команда: `allure:serve`
 
-Пример отчета: [Allure Overview](https://drive.google.com/file/d/1eXKAYbitijOZVUgGdNCSxAnlz_4vv6Hm/view?usp=sharing)
+Пример отчета: [Allure Overview](https://drive.google.com/file/d/1ACWFvV4DoG-T2MGVSuexWbMX9I9S_RO_/view?usp=sharing)
 > Примечание: все упавшие тесты в указанном примере отчета - тесты с багами
 
 В информацию о прохождении теста включается:
 - Текущие данные тестового набора - при наличии;
 - Ссылка на документацию по тестируемому запросу;
 - Отметка о наличии бага (которая должна включать в себя ссылку на заведенный баг) - при наличии;
-- Шаги теста;
+- Отметки о наличии общих для сценария спецификаций  
+- Шаги теста:
+  - Данные используемые в отправке запроса/проверке ответа
+  - Спецификации используемые в запросе/ответе
+  - HTTP запрос/ответ
+  - Текст ошибки - при наличии  
 - Лог прохождения теста (в шаге Tear down - AttachLogs).
 
-Пример данных отчета по одному тесту: [Allure test view](https://drive.google.com/file/d/1wH-_Xp9e1NOUUCSItCLsDZ1WocmtLRrF/view?usp=sharing)
+Пример данных отчета по одному тесту: [Allure test view](https://drive.google.com/file/d/1AXPHxO4_x1MS6gTLOm8xMNVsenj9d24s/view?usp=sharing)
 
 ## Автор
 
