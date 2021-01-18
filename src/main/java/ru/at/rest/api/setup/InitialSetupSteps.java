@@ -5,7 +5,6 @@ import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
-import io.restassured.specification.ResponseSpecification;
 import lombok.experimental.Delegate;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.ThreadContext;
@@ -16,7 +15,6 @@ import ru.at.rest.api.dto.response.ResponseSpecData;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static ru.at.rest.api.dto.request.RequestSpecBuilder.createRequestSpec;
@@ -30,8 +28,6 @@ import static ru.at.rest.api.utils.Utils.*;
 public class InitialSetupSteps {
 
     private static final String startDateTime = getCurrentDateTimeAsString("dd-MM-yyyy HH-mm");
-
-    public static Map<String, ResponseSpecification> responseSpecs;
 
     @Delegate
     CoreScenario coreScenario = CoreScenario.getInstance();
