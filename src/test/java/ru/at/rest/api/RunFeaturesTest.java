@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
         monochrome = true,
-        plugin = {"io.qameta.allure.cucumber6jvm.AllureCucumber6Jvm"},
+        plugin = {"ru.at.rest.api.cucumber.plugin.AllureCucumber6Jvm"},
         tags = "@image",
         features = "src/test/resources/features",
         glue = {"ru"}

@@ -85,7 +85,6 @@
             <artifactId>allure-rest-assured</artifactId>
             <version>${allure.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>
