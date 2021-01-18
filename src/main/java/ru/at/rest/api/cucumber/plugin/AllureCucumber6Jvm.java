@@ -12,7 +12,6 @@ import io.qameta.allure.Step;
 import io.qameta.allure.cucumber6jvm.testsourcemodel.TestSourcesModelProxy;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.*;
-import org.aspectj.lang.annotation.Aspect;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
@@ -28,7 +27,12 @@ import static io.qameta.allure.util.ResultsUtils.*;
 import static ru.at.rest.api.cucumber.ScopedVariables.resolveVars;
 import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
 
-@Aspect
+@SuppressWarnings({
+        "ClassDataAbstractionCoupling",
+        "ClassFanOutComplexity",
+        "PMD.ExcessiveImports",
+        "PMD.GodClass",
+})
 public class AllureCucumber6Jvm implements ConcurrentEventListener {
 
     private final AllureLifecycle lifecycle;
