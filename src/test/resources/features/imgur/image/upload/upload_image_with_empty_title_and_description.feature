@@ -3,6 +3,7 @@
 #@image
 @upload
 @positive
+@ResponseSpec=CommonSuccess
 @Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
 Функционал: [Image Upload]
 
@@ -11,30 +12,28 @@
 
   Структура сценария: Загрузка изображения с указанием пустого значения параметров "title" и "description"
     Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
-      | ACCESS_TOKEN  | Authorization | imgur.api.bearer  |
+      | SPEC          | BearerAuth    |                   |
       | <image-type>  | image         | <image-source>    |
       | MULTIPART     | title         | emptyString       |
       | MULTIPART     | description   | emptyString       |
-    Затем выполнено сохранение элементов Response из переменной "imageUploadResponse" в соответствии с таблицей
-      | BODY_JSON | data.id         | imageHash |
-      | BODY_JSON | data.deletehash | hash      |
+    И выполнено сохранение элементов Response из переменной "imageUploadResponse" в соответствии с таблицей
+      | BODY_JSON | data.id | imageHash |
+      | BODY_JSON | data.id | hash      |
     Тогда ответ Response из переменной "imageUploadResponse" соответствует условиям из таблицы
-      | STATUS    | message           | ==    | HTTP/1.1 200 OK          |
-      | BODY_JSON | data.id           | ~     | imgur.correct.image.id   |
-      | BODY_JSON | data.deletehash   | ~     | imgur.correct.deletehash |
-      | BODY_JSON | data.title        | null  |                          |
-      | BODY_JSON | data.description  | null  |                          |
-      | BODY_JSON | data.link         | ==    | imgur.correct.link       |
-      | BODY_JSON | success           | ==    | true                     |
-      | BODY_JSON | status            | ==    | 200                      |
+      | SPEC  | UploadSuccess     | -     | none   | none |
+      | BODY  | data.title        | null  | none   |      |
+      | BODY  | data.description  | null  | none   |      |
 
-    Когда выполнен DELETE запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageDeleteResponse"
-      | HEADER  | Authorization | Client-ID {imgur.api.client.id} |
-    Тогда ответ Response из переменной "imageDeleteResponse" соответствует условиям из таблицы
-      | STATUS    | message | == | HTTP/1.1 200 OK  |
-      | BODY_JSON | data    | == | true             |
-      | BODY_JSON | success | == | true             |
-      | BODY_JSON | status  | == | 200              |
+    Когда выполнен GET запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageGetResponse"
+      | SPEC            | ClientIDAuth  |               |
+    Тогда ответ Response из переменной "imageGetResponse" соответствует условиям из таблицы
+      | BODY_JSON | data.id           | ==    | string | imageHash          |
+      | BODY_JSON | data.link         | ==    | string | imgur.correct.link |
+      | BODY_JSON | data.title        | null  | none   |                    |
+      | BODY_JSON | data.description  | null  | none   |                    |
+
+    Затем выполнен DELETE запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы
+      | SPEC  | BearerAuth  |     |
 
     Примеры:
       | image-type  | image-source              |

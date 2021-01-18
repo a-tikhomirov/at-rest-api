@@ -3,46 +3,32 @@
 @image
 @get
 @positive
+@ResponseSpec=CommonSuccess
 @Link=https://apidocs.imgur.com/#2078c7e0-c2b8-4bc8-a646-6e544b087d0f
 Функционал: [Get Image]
 
   Предыстория: Загрузка и удаление изображения
     Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
-      | ACCESS_TOKEN  | Authorization | imgur.api.bearer  |
-      | MULTIPART     | image         | image.url.lt10    |
-      | MULTIPART     | title         | initial title       |
-      | MULTIPART     | description   | initial description |
+      | SPEC      | BearerAuth  |                     |
+      | MULTIPART | image       | image.url.lt10      |
+      | MULTIPART | title       | initial title       |
+      | MULTIPART | description | initial description |
     Затем выполнено сохранение элементов Response из переменной "imageUploadResponse" в соответствии с таблицей
-      | BODY_JSON | data.id         | imageHash       |
-      | BODY_JSON | data.deletehash | imageDeleteHash |
+      | BODY_JSON | data.id | imageHash |
+      | BODY_JSON | data.id | hash      |
     Тогда ответ Response из переменной "imageUploadResponse" соответствует условиям из таблицы
-      | STATUS    | message           | == | HTTP/1.1 200 OK          |
-      | BODY_JSON | data.id           | ~  | imgur.correct.image.id   |
-      | BODY_JSON | data.deletehash   | ~  | imgur.correct.deletehash |
-      | BODY_JSON | data.link         | == | imgur.correct.link       |
-      | BODY_JSON | data.title        | == | initial title            |
-      | BODY_JSON | data.description  | == | initial description      |
-      | BODY_JSON | success           | == | true                     |
-      | BODY_JSON | status            | == | 200                      |
+      | SPEC      | UploadSuccess     | -  | none   | none                |
+      | BODY_JSON | data.title        | == | string | initial title       |
+      | BODY_JSON | data.description  | == | string | initial description |
 
   Сценарий: Получение информации об изображении
     Когда выполнен GET запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageGetResponse"
-      | HEADER          | Authorization | Client-ID {imgur.api.client.id} |
-      | PATH_PARAMETER  | hash          | imageHash                       |
+      | SPEC            | ClientIDAuth  |           |
     Тогда ответ Response из переменной "imageGetResponse" соответствует условиям из таблицы
-      | STATUS    | message           | == | HTTP/1.1 200 OK      |
-      | BODY_JSON | data.id           | == | imageHash            |
-      | BODY_JSON | data.link         | == | imgur.correct.link   |
-      | BODY_JSON | data.title        | == | initial title        |
-      | BODY_JSON | data.description  | == | initial description  |
-      | BODY_JSON | success           | == | true                 |
-      | BODY_JSON | status            | == | 200                  |
+      | BODY_JSON | data.id           | == | string | imageHash            |
+      | BODY_JSON | data.link         | == | string | imgur.correct.link   |
+      | BODY_JSON | data.title        | == | string | initial title        |
+      | BODY_JSON | data.description  | == | string | initial description  |
 
-    Когда выполнен DELETE запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageDeleteResponse"
-      | HEADER          | Authorization | Client-ID {imgur.api.client.id} |
-      | PATH_PARAMETER  | hash          | imageDeleteHash                 |
-    Тогда ответ Response из переменной "imageDeleteResponse" соответствует условиям из таблицы
-      | STATUS    | message | == | HTTP/1.1 200 OK  |
-      | BODY_JSON | data    | == | true             |
-      | BODY_JSON | success | == | true             |
-      | BODY_JSON | status  | == | 200              |
+    Когда выполнен DELETE запрос на URL "imgur.api.image.modify" с headers и parameters из таблицы
+      | SPEC      | BearerAuth  |                     |

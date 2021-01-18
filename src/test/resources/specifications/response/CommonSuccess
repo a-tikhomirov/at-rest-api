@@ -1,0 +1,5 @@
+STATUS_CODE |               | == | int      | 200
+STATUS_LINE |               | == | string   | HTTP/1.1 200 OK
+HEADER      | Content-Type  | == | string   | application/json
+BODY_JSON   | success       | == | boolean  | true
+BODY_JSON   | status        | == | int      | 200

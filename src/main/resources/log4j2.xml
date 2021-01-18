@@ -44,5 +44,6 @@
             <AppenderRef ref="File"/>
             <AppenderRef ref="Async"/>
         </Logger>
+        <Logger name="io.qameta.allure.AllureLifecycle" level="off"/>
     </Loggers>
 </Configuration>

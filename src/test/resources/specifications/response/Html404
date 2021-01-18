@@ -1,0 +1,4 @@
+STATUS_CODE |                 | == | int    | 404
+HEADER      | Content-Type    | == | string | text/html; charset=utf-8
+STATUS_LINE |                 | == | string | HTTP/1.1 404 Not Found
+BODY_HTML   | html.head.title | == | string | imgur: the simple 404 page

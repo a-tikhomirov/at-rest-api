@@ -42,6 +42,11 @@ public class CoreEnvironment {
         getVariables().put(name, object);
     }
 
+    /**
+     * Очищает все переменные сценария
+     */
+    public void clearVars() { getVariables().clear(); }
+
     private ScopedVariables getVariables() {
         if (variables.get() == null) {
             variables.set(new ScopedVariables());

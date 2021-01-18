@@ -67,15 +67,15 @@ public class PropertyLoader {
         }
         String resultValue = tryLoadProperty(valueToFind);
         if (resultValue != null) {
-            log.info("Значение переменной: " + valueToFind + " из " + PROPERTIES_FILE + " = " + resultValue);
+            log.debug("Значение переменной: " + valueToFind + " из " + PROPERTIES_FILE + " = " + resultValue);
             return resultValue;
         }
         resultValue = (String) CoreScenario.getInstance().tryGetVar(valueToFind);
         if (resultValue != null) {
-            log.info("Значение переменной: " + valueToFind + " из хранилища переменных = " + resultValue);
+            log.debug("Значение переменной: " + valueToFind + " из хранилища переменных = " + resultValue);
             return resultValue;
         }
-        log.info(format("Значение %s не было найдено ни в properties, ни в environment переменной. Будет использовано значение по умолчанию.", valueToFind));
+        log.debug(format("Значение %s не было найдено ни в properties, ни в environment переменной. Будет использовано значение по умолчанию.", valueToFind));
         return valueToFind;
     }
 

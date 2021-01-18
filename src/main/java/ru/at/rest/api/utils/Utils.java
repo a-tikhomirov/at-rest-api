@@ -1,26 +1,35 @@
 package ru.at.rest.api.utils;
 
-import com.google.common.io.ByteStreams;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.plugin.event.DataTableArgument;
+import io.qameta.allure.Allure;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.Method;
-import io.restassured.specification.*;
+import io.restassured.specification.FilterableRequestSpecification;
+import io.restassured.specification.RequestSender;
+import lombok.extern.log4j.Log4j2;
+import ru.at.rest.api.cucumber.CoreScenario;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.restassured.internal.print.RequestPrinter.print;
 import static java.util.Collections.emptySet;
+import static org.junit.jupiter.api.Assertions.fail;
 
+@Log4j2
 public class Utils {
 
     /**
@@ -72,58 +81,58 @@ public class Utils {
     }
 
     /**
-     * Возвращает объект класса File из папки resources
+     * Формирует объект класса DataTable на основе данных из файла
      *
-     * @param fileName  имя файла в папке resources
-     * @return          объект класса File
+     * @param file          файл для формирования DataTable
+     * @return              объект класса DataTable
      */
-    public File getFileFromResources(String fileName) {
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("Файл не найден:" + fileName);
+    public static DataTable getDataTableFromFile(File file) {
+        List<List<String>> content = new ArrayList<>();
+        for(String line:ResourceLoader.getInstance().getFileAsList(file)) {
+            content.add(Arrays.stream(line.split("\\|"))
+                    .map(s -> s = s.trim())
+                    .collect(Collectors.toList())
+            );
         }
-        File file = null;
-        try {
-            file = Paths.get(resource.toURI()).toFile();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return file;
+        return DataTable.create(content);
     }
 
     /**
-     * Производит считывание файла из папки resources
-     * и возвращет считанный файл в виде массива байт
+     * Выводит в лог сообщение об ошибке и прикрепляет сообщение к шагу в отчете allure
      *
-     * @param fileName  имя файла в папке resources
-     * @return          считанный файл в виде массива байт
+     * @param message           сообщение об ошибке
      */
-    public byte[] getFileFromResourcesAsByteArray(String fileName){
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(fileName);
-        byte[] result = null;
+    public static void attachErrorMessage(String message) {
+        log.error(message);
+        CoreScenario.getInstance().getScenario().attach(message, "text/plain", "error message");
+        fail(message);
+    }
 
-        if (inputStream == null) {
-            throw new IllegalArgumentException("Файл не найден: " + fileName);
-        } else {
-            try {
-                result = ByteStreams.toByteArray(inputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
+    /**
+     * Прикрепляет к текущему шагу заданную таблицу dataTableArgument для отчета allure
+     *
+     * @param name                  имя для отображения прикрепленной таблицы
+     * @param dataTableArgument     таблица для прикрепления к шагу отчета
+     */
+    public static void createDataTableAttachment(String name, final DataTableArgument dataTableArgument) {
+        final List<List<String>> rowsInTable = dataTableArgument.cells();
+        final StringBuilder dataTableCsv = new StringBuilder();
+        for (List<String> columns : rowsInTable) {
+            if (!columns.isEmpty()) {
+                for (int i = 0; i < columns.size(); i++) {
+                    if (i == columns.size() - 1) {
+                        dataTableCsv.append(columns.get(i));
+                    } else {
+                        dataTableCsv.append(columns.get(i));
+                        dataTableCsv.append('\t');
+                    }
+                }
+                dataTableCsv.append('\n');
             }
         }
-        return result;
+        final String attachmentSource = Allure.getLifecycle()
+                .prepareAttachment(name, "text/tab-separated-values", "csv");
+        Allure.getLifecycle().writeAttachment(attachmentSource,
+                new ByteArrayInputStream(dataTableCsv.toString().getBytes(StandardCharsets.UTF_8)));
     }
-
-    /**
-     * Производит считывание файла из папки resources
-     * и возвращет считанный файл в виде Base64 строки
-     *
-     * @param fileName  имя файла в папке resources
-     * @return          считанный файл в виде Base64 строки
-     */
-    public String getFileFromResourcesAsBase64String(String fileName){
-        return Base64.getEncoder().encodeToString(this.getFileFromResourcesAsByteArray(fileName));
-    }
-
 }

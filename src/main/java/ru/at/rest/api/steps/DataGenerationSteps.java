@@ -40,7 +40,7 @@ public class DataGenerationSteps {
         if (!(varValue instanceof String)) {
             throw new IllegalArgumentException("Данный шаг применим только переменных в которых хранится объект класса String");
         }
-        String newValue = replaceRegexInString((String) varValue, regexp, replacement);
+        String newValue = String.valueOf(varValue).replaceAll(regexp,replacement);
         coreScenario.setVar(newVar, newValue);
         log.info(format("В строке %s из переменной %s была заменена часть %s на %s. Итоговое значение сохранено в переменную: %s = %s",
                 varValue, varName, regexp, replacement, newVar, newValue));
@@ -80,19 +80,6 @@ public class DataGenerationSteps {
                 throw new IllegalArgumentException("Не реализована генерация случайного символа для языка: " + lang);
         }
         return c;
-    }
-
-    /**
-     * Производит замену части строки на новое значение
-     *
-     * @param str           первоначальная строка
-     * @param regex         регулярное выражение, по которому будет выбрана часть для замены
-     * @param replacement   замена
-     * @return              результирующая строка, где часть, которая соответствует регулярному выражению
-     *                      regex заменена на replacement
-     */
-    public static String replaceRegexInString(String str, String regex, String replacement) {
-        return str.replaceAll(regex,replacement);
     }
 
     public enum Lang {

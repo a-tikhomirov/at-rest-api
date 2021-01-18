@@ -1,0 +1,5 @@
+STATUS_CODE |               | == | int      | 400
+STATUS_LINE |               | == | string   | HTTP/1.1 400 Bad Request
+HEADER      | Content-Type  | == | string   | application/json
+BODY_JSON   | success       | == | boolean  | false
+BODY_JSON   | status        | == | int      | 400

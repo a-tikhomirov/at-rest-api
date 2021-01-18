@@ -3,6 +3,7 @@
 ## Сводка
 
 - [Требования](#Требования)
+- [Что нового](#Что-нового)
 - [Скачивание и запуск проекта](#Скачивание-и-запуск-проекта)
 - [Информация о проекте](#Информация-о-проекте)
     - [Информация по тестам](#Информация-по-тестам)
@@ -19,6 +20,66 @@
     - Gherkin
     - Cucumber for Java
     - Lombok
+    
+## Что нового
+<a name="Что-нового"></a>
+
+Что нового по сравнению с веткой master:  
+
+Техническая часть:
+1. Отправка запросов и валидация ответов переделена под работу с RequestSpecification и ResponseSpecification соответственно
+2. Реализация формирования спецификаций вынесена из ru.at.rest.api.steps в отдельные классы в ru.at.rest.api.dto.request и ru.at.rest.api.dto.response
+3. Добавлены собственные классы, определяющие преобразование данных для отправки запроса/формирования ответа из DataTable: RequestSpecData и ResponseSpecData
+
+Практическая часть:
+1. Для спецификации ответа добавлена опция указания типа проверяемого значения
+2. Добавлена поддержка использования предпоготовленных спецификаций запроса/ответа:  
+- В файле свойств проекта, при наличии записи `prebuild.request.specs = <path>` - будут сформированы спецификации запросов на основе файлов, хранящихся по указанному пути в папке resources  
+- В файле свойств проекта, при наличии записи `prebuild.response.specs = <path>` - будут сформированы спецификации ответов на основе файлов, хранящихся по указанному пути в папке resources  
+
+Сформированные спецификации возможно указать как для сценария в целом (будут применяться для всех запросов/ответов сценария):
+```
+@RequestSpec=BearerAuth
+@ResponseSpec=CommonSuccess
+```
+Так и для отдельного запроса/ответа в частности:
+```
+Когда выполнен POST запрос на URL "imgur.api.image" с headers и parameters из таблицы. Полученный ответ сохранен в переменную "imageUploadResponse"
+  | SPEC      | BearerAuth  |                     |
+  | MULTIPART | image       | image.url.lt10      |
+  | MULTIPART | title       | initial title       |
+  | MULTIPART | description | initial description |
+Тогда ответ Response из переменной "imageUploadResponse" соответствует условиям из таблицы
+  | SPEC      | UploadSuccess     | -  | none   | none                |
+  | BODY_JSON | data.title        | == | string | initial title       |
+  | BODY_JSON | data.description  | == | string | initial description |
+```
+
+Имя спецификации устанавливается в соответствии с именем файла, из которого спецификация была сформирована.
+
+При описании спецификации возможно использовать вложенность:  
+ResponseSpecification UploadSuccess:
+```
+SPEC      | CommonSuccess   | -  | none   | none
+BODY_JSON | data.id         | ~  | string | imgur.correct.image.id
+BODY_JSON | data.deletehash | ~  | string | imgur.correct.deletehash
+BODY_JSON | data.link       | == | string | imgur.correct.link
+```
+ResponseSpecification CommonSuccess:
+```
+STATUS_CODE |               | == | int      | 200
+STATUS_LINE |               | == | string   | HTTP/1.1 200 OK
+HEADER      | Content-Type  | == | string   | application/json
+BODY_JSON   | success       | == | boolean  | true
+BODY_JSON   | status        | == | int      | 200
+```
+Используемые в тесте общие спецификации отображаются в отчете allure в шаге Set up: configureRestAssured [Scenario-Global Specifications](https://drive.google.com/file/d/1S2dPrD1hvD-KKvhwePBHoUZcQb97t-da/view?usp=sharing)  
+Используемые в отдельном запросе/ответе спецификации также отображаются в отчете: [Step Specifications](https://drive.google.com/file/d/1HjmRUccOlvpOxmXs10HWC8llTy3nzTJt/view?usp=sharing)
+
+3. Добавлено прикрепление запросов/ответов к соответствующим шагам в allure. Для выключения: ключ -DattachHTTP=false  
+4. Сокращен вывод информации в лог файлы (как в общий лог, так и в лог каждого скрипта)
+5. Все тесты переработаоны под использование предподготовленных спецификаций запросов/ответов
+6. Во всех тестах, при проверке ответа указаны типы проверяемых значений
 
 ## Скачивание и запуск проекта
 <a name="Скачивание-и-запуск-проекта"></a>

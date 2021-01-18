@@ -14,7 +14,7 @@ import static ru.at.rest.api.utils.PropertyLoader.loadProperty;
 public class ScopedVariables {
 
     private static final String CURVE_BRACES_PATTERN = "\\{([^{}]+)\\}";
-    private Map<String, Object> variables = Maps.newHashMap();
+    private final Map<String, Object> variables = Maps.newHashMap();
 
     /**
      * Проверяет заданную строку на возможность подставновки параметров.
@@ -29,7 +29,7 @@ public class ScopedVariables {
         if (inputString == null || inputString.isEmpty()) {
             return inputString;
         }
-        log.info(format("Проверка строки %s на возможность подстановки параметров", inputString));
+        log.debug(format("Проверка строки %s на возможность подстановки параметров", inputString));
         Pattern p = Pattern.compile(CURVE_BRACES_PATTERN);
         Matcher m = p.matcher(inputString);
         String newString = "";
@@ -37,7 +37,7 @@ public class ScopedVariables {
             String varName = m.group(1);
             String value = loadProperty(varName, (String) CoreScenario.getInstance().tryGetVar(varName));
             if (value == null) {
-                log.info(format("Значение %s не было найдено ни в properties, ни в environment переменной", varName));
+                log.debug(format("Значение %s не было найдено ни в properties, ни в environment переменной", varName));
                 newString = m.replaceFirst("__[__" + m.group(1) + "__]__");
             } else {
                 newString = m.replaceFirst(value);
@@ -48,7 +48,7 @@ public class ScopedVariables {
         if (newString.isEmpty()) {
             newString = inputString;
         } else {
-            log.info(format("Найден параметр для подстановки. Новое значение строки %s = %s", inputString, newString));
+            log.debug(format("Найден параметр для подстановки. Новое значение строки %s = %s", inputString, newString));
         }
         return newString;
     }

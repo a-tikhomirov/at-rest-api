@@ -1,25 +1,26 @@
 package ru.at.rest.api.steps;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.ru.И;
 import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSender;
-import io.restassured.specification.RequestSpecification;
-import lombok.SneakyThrows;
+import io.restassured.specification.ResponseSpecification;
 import lombok.extern.log4j.Log4j2;
-import ru.at.rest.api.utils.Utils;
 import ru.at.rest.api.cucumber.CoreScenario;
-
-import java.util.Arrays;
-import java.util.List;
+import ru.at.rest.api.dto.request.RequestSpecBuilder;
+import ru.at.rest.api.dto.request.RequestSpecData;
 
 import static java.lang.String.format;
-import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
-import static ru.at.rest.api.utils.Utils.requestSpecToString;
 import static ru.at.rest.api.cucumber.ScopedVariables.resolveVars;
+import static ru.at.rest.api.dto.request.RequestSpecBuilder.createRequestSpec;
+import static ru.at.rest.api.dto.request.RequestSpecBuilder.getRequestSpecDataFromTable;
+import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
+import static ru.at.rest.api.utils.Utils.attachErrorMessage;
+import static ru.at.rest.api.utils.Utils.requestSpecToString;
 
 @Log4j2
 public class RequestSteps {
@@ -32,157 +33,111 @@ public class RequestSteps {
         return Method.valueOf(method);
     }
 
+    @DataTableType
+    public RequestSpecData getRequestSpecData(DataTable table) {
+        return getRequestSpecDataFromTable(table);
+    }
+
+    /**
+     * Отправка http запроса по заданному url.
+     *
+     * @param method               метод HTTP запроса
+     * @param address              url запроса
+     */
+    @И(REQUEST_URL)
+    public void sendSimpleHttpRequest(Method method, String address) {
+        sendRequest(method, address, null);
+    }
+
+    /**
+     * Отправка http запроса по заданному url.
+     * Полученный ответ сохраняется в заданную переменную
+     *
+     * @param method               метод HTTP запроса
+     * @param address              url запроса
+     * @param responseNameVariable имя переменной в которую сохраняется ответ
+     */
+    @И(REQUEST_URL + ". Полученный ответ сохранен в переменную {string}")
+    public void sendSimpleHttpRequestSaveResponse(Method method, String address, String responseNameVariable) {
+        Response response = sendRequest(method, address, null);
+        coreScenario.setVar(responseNameVariable, response);
+        log.info("Ответ сохранен в переменную с именем: " + responseNameVariable);
+    }
+
     /**
      * Отправка http запроса по заданному url с параметрами из таблицы.
      *
      * @param method               метод HTTP запроса
      * @param address              url запроса
-     * @param dataTable            таблица параметров для http запроса. Формат таблицы см. в {@link #createRequest(DataTable) createRequest}
+     * @param dataTable            таблица параметров для http запроса. Формат таблицы см. в {@link RequestSpecBuilder#createRequestSpec(RequestSpecData) createRequest}
      */
     @И(REQUEST_URL + " с headers и parameters из таблицы")
-    public void sendHttpRequest(Method method, String address, DataTable dataTable) {
+    public void sendHttpRequest(Method method, String address, RequestSpecData dataTable) {
         sendRequest(method, address, dataTable);
     }
 
     /**
      * Отправка http запроса по заданному url с параметрами из таблицы.
-     * Результат сохраняется в заданную переменную
+     * Полученный ответ сохраняется в заданную переменную
      *
      * @param method               метод HTTP запроса
      * @param address              url запроса
      * @param responseNameVariable имя переменной в которую сохраняется ответ
-     * @param dataTable            таблица параметров для http запроса. Формат таблицы см. в {@link #createRequest(DataTable) createRequest}
+     * @param dataTable            таблица параметров для http запроса. Формат таблицы см. в {@link RequestSpecBuilder#createRequestSpec(RequestSpecData) createRequest}
      */
     @И(REQUEST_URL + " с headers и parameters из таблицы. Полученный ответ сохранен в переменную {string}")
     public void sendHttpRequestSaveResponse(Method method,
                                             String address,
                                             String responseNameVariable,
-                                            DataTable dataTable) {
+                                            RequestSpecData dataTable) {
         Response response = sendRequest(method, address, dataTable);
         coreScenario.setVar(responseNameVariable, response);
         log.info("Ответ сохранен в переменную с именем: " + responseNameVariable);
     }
 
     /**
-     * Отправка HTTP запроса
+     * Отправка HTTP на основе ResponseSpecification сформированного по данным из таблицы requestSpecData
      *
      * @param method                метод HTTP запроса
      * @param address               url, на который будет направлен запрос
-     * @param dataTable             таблица параметров для http запроса. Формат таблицы см. в {@link #createRequest(DataTable) createRequest}
+     * @param requestSpecData       таблица параметров для http запроса. {@link RequestSpecData}
+     *                              Формат таблицы см. в {@link RequestSpecBuilder#createRequestSpec(RequestSpecData) createRequest}
      * @return Response             ответ Response на отправленный запрос
      */
-    @SneakyThrows
-    private Response sendRequest(Method method, String address, DataTable dataTable) {
+    private Response sendRequest(Method method, String address, RequestSpecData requestSpecData) {
         log.info("Формирование запроса для отправки...");
         address = resolveVars(loadValuePropertyOrVariableOrDefault(address));
-        log.info(format("Отправка %s запроса на url %s с параметрами:\n%s", method, address, dataTable.toString()));
+        if (requestSpecData != null) {
+            log.info(format("Подготовка %s запроса на url %s с параметрами:\n%s", method, address, requestSpecData.toDataTable()));
+            //createDataTableAttachment(requestSpecData);
+        }
 
-        RequestSender request = createRequest(dataTable);
+        /*
+        Сделан сброс RestAssured.responseSpecification чтобы логировать запрос и ответ в Log4j2
+        Если оставить RestAssured.responseSpecification и делать лог через RestAssured .log() и
+        RestAssured.config = config().logConfig(new LogConfig(logStream, false));
+        где logStream - PrintStream логгера Log4j2
+        то, в лог файлах отдельных сценариев вывод логов запроса/ответа происходит вперемешку с остальными вызовами log.info()
+        Возможно это как то можно победить, но решил оставить так - тоже работает, и вроде красиво :)
+        */
+        ResponseSpecification responseSpec = RestAssured.responseSpecification;
+        RestAssured.responseSpecification = null;
+
+        RequestSender request = createRequestSpec(requestSpecData);
         Response response = request.request(method, address);
-
         log.info("Отправлен запрос:\n" + requestSpecToString(request, method, address));
         log.info(format("Получен ответ:\n%s\n%s", response.getStatusLine(), response.asPrettyString()));
 
+        if (responseSpec != null) {
+            RestAssured.responseSpecification = responseSpec;
+            try {
+                response.then().spec(responseSpec);
+            } catch (AssertionError e) {
+                attachErrorMessage(e.getMessage());
+                return null;
+            }
+        }
         return response;
-    }
-
-    /**
-     * Возвращает сформированный на основе данных из таблицы dataTable объекта класса RequestSender
-     *
-     * @param dataTable             Таблица с указанием элементов Request для установки значений в формате:
-     *                              | <часть Request> | <ключ/имя элемента> | <устанавливаемое значение> |
-     *                              ...
-     *                              | <часть Request> | <ключ/имя элемента> | <устанавливаемое значение> |
-     *                              возможные значения <часть Request> cм. {@link RequestPart}
-     *                              возможные значения <ключ/имя элемента> зависят от части Request
-     *                              возможные значения <устанавливаемое значение> также зависят от части Request
-     *                              <устанавливаемое значение> может быть задано как непосредственно значение как имя для значения в property файле/в хранилище переменных
-     *                              В элементе <устанавливаемое значение> возможно использовать параметризацию, см. в {@link ru.at.rest.api.cucumber.ScopedVariables#resolveVars(String) resolveVars}
-     * @return                      сформированный запрос в виде объекта класса RequestSender
-     */
-    private RequestSender createRequest(DataTable dataTable) {
-        RequestSpecification request = RestAssured.given();
-        if (dataTable != null) {
-            for (List<String> requestParam : dataTable.asLists()) {
-                RequestPart requestPart = RequestPart.get(requestParam.get(0).toUpperCase());
-                String key = requestParam.get(1);
-                String value = resolveVars(loadValuePropertyOrVariableOrDefault(requestParam.get(2)));
-
-                this.setRequestElementValue(request, requestPart, key, value);
-            }
-        }
-        return request;
-    }
-
-    /**
-     * Устанавливает значение элемента для заданной части запроса Request
-     *
-     * @param request           объект класса RequestSpecification для установки значения
-     * @param requestPart       часть Request для установки значения. См. {@link RequestPart}
-     * @param key               имя/ключ элемента части Request для установки значения
-     * @param value             устанавливаемое значение
-     */
-    private void setRequestElementValue(RequestSpecification request, RequestPart requestPart, String key, String value) {
-        switch (requestPart) {
-            case HEADER: {
-                request.header(key, value);
-                break;
-            }
-            case BASIC_AUTHENTICATION: {
-                request.auth().basic(key, value);
-                break;
-            }
-            case ACCESS_TOKEN: {
-                request.header(key, "Bearer " + value);
-                break;
-            }
-            case PARAMETER: {
-                request.queryParam(key, value);
-                break;
-            }
-            case FORM_PARAMETER: {
-                request.formParam(key, value);
-                break;
-            }
-            case PATH_PARAMETER: {
-                request.pathParam(key, value);
-                break;
-            }
-            case MULTIPART: {
-                request.multiPart(key, value);
-                break;
-            }
-            case FILE: {
-                request.multiPart(key, new Utils().getFileFromResources(value));
-                break;
-            }
-            case BASE64_FILE: {
-                request.multiPart(key, new Utils().getFileFromResourcesAsBase64String(value));
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException(format("Не задано поведение для части запроса %s", requestPart));
-            }
-        }
-    }
-
-    public enum RequestPart {
-        HEADER,
-        BASIC_AUTHENTICATION,
-        ACCESS_TOKEN,
-        PARAMETER,
-        FORM_PARAMETER,
-        PATH_PARAMETER,
-        MULTIPART,
-        FILE,
-        BASE64_FILE;
-
-        public static RequestPart get(String value) {
-            for(RequestPart v : values())
-                if(v.toString().equalsIgnoreCase(value)) return v;
-            throw new IllegalArgumentException(format("Не найдена часть RequestPart: %s\nВозможные значения: %s",
-                    value, Arrays.asList(RequestPart.values())));
-        }
     }
 
 }

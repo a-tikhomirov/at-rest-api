@@ -1,0 +1,4 @@
+SPEC      | CommonSuccess   | -  | none   | none
+BODY_JSON | data.id         | ~  | string | imgur.correct.image.id
+BODY_JSON | data.deletehash | ~  | string | imgur.correct.deletehash
+BODY_JSON | data.link       | == | string | imgur.correct.link
