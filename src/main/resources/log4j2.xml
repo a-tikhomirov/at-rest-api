@@ -45,5 +45,6 @@
             <AppenderRef ref="Async"/>
         </Logger>
         <Logger name="io.qameta.allure.AllureLifecycle" level="off"/>
+        <Logger name="ru.at.rest.api.cucumber.plugin.LabelBuilder" level="off"/>
     </Loggers>
 </Configuration>

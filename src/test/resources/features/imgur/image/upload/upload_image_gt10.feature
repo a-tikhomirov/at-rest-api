@@ -6,6 +6,7 @@
 @RequestSpec=BearerAuth
 @ResponseSpec=CommonFail
 @Link=https://apidocs.imgur.com/#c85c9dfc-7487-4de2-9ecd-66f727cf3139
+  @ptest
 Функционал: [Image Upload]
 
   Структура сценария: Загрузка изображения размер которого превышает 10Mb

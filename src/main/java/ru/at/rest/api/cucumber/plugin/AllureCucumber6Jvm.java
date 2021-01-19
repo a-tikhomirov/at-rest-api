@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import static io.qameta.allure.util.ResultsUtils.*;
 import static ru.at.rest.api.cucumber.ScopedVariables.resolveVars;
+import static ru.at.rest.api.utils.PropertyLoader.loadProperty;
 import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
 
 @SuppressWarnings({
@@ -162,7 +163,7 @@ public class AllureCucumber6Jvm implements ConcurrentEventListener {
             ).orElse("UNDEFINED");
 
             final StepResult stepResult = new StepResult()
-                    .setName(String.format("%s %s", stepKeyword, pickleStep.getStep().getText()))
+                    .setName(String.format("%s %s", stepKeyword, updateName(pickleStep.getStep().getText(), pickleStep.getDefinitionArgument())))
                     .setStart(System.currentTimeMillis());
 
             lifecycle.startStep(getTestCaseUuid(currentTestCase.get()), getStepUuid(pickleStep), stepResult);
@@ -175,6 +176,26 @@ public class AllureCucumber6Jvm implements ConcurrentEventListener {
         } else if (event.getTestStep() instanceof HookTestStep) {
             initHook((HookTestStep) event.getTestStep());
         }
+    }
+
+    private String updateName(String name, List<Argument> arguments) {
+        name = name.replaceAll("\"[^\"]*\"", "PARAMETER");
+        String[] split = name.split("PARAMETER");
+        StringBuilder updateName = new StringBuilder();
+        List<String> stringArgs = arguments.stream()
+                .filter(arg-> arg.getParameterTypeName().equals("string"))
+                .map(arg -> arg.getValue().replaceAll("\"",""))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < split.length; i++) {
+            updateName.append(split[i]);
+            if (i < stringArgs.size()) {
+                updateName.append("\"")
+                        .append(resolveVars(loadProperty(stringArgs.get(i), stringArgs.get(i))))
+                        .append("\"");
+            }
+        }
+        return updateName.toString();
     }
 
     private void initHook(final HookTestStep hook) {
