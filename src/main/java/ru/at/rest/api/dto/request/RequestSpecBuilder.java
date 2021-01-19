@@ -1,6 +1,7 @@
 package ru.at.rest.api.dto.request;
 
 import io.cucumber.datatable.DataTable;
+import io.qameta.allure.Allure;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.log4j.Log4j2;
@@ -14,9 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 import static ru.at.rest.api.cucumber.ScopedVariables.resolveVars;
+import static ru.at.rest.api.cucumber.plugin.AllureCucumber6Jvm.createDataTableAttachment;
 import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
 import static ru.at.rest.api.utils.PropertyLoader.tryLoadProperty;
-import static ru.at.rest.api.utils.Utils.createDataTableAttachment;
 import static ru.at.rest.api.utils.Utils.getDataTableFromFile;
 
 @Log4j2
@@ -103,7 +104,7 @@ public class RequestSpecBuilder {
             case SPEC: {
                 RequestSpecData requestSpecData = getRequestSpec(key);
                 log.info(format("RequestSpecification %s:\n%s", key, requestSpecData.toDataTable()));
-                createDataTableAttachment("RequestSpecification " + key, requestSpecData);
+                createDataTableAttachment(Allure.getLifecycle(), "RequestSpecification " + key, requestSpecData);
                 request.spec(createRequestSpec(requestSpecData));
                 break;
             }

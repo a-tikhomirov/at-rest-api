@@ -1,6 +1,7 @@
 package ru.at.rest.api.dto.response;
 
 import io.cucumber.datatable.DataTable;
+import io.qameta.allure.Allure;
 import io.restassured.RestAssured;
 import io.restassured.specification.ResponseSpecification;
 import lombok.AllArgsConstructor;
@@ -21,9 +22,9 @@ import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static ru.at.rest.api.cucumber.ScopedVariables.resolveVars;
+import static ru.at.rest.api.cucumber.plugin.AllureCucumber6Jvm.createDataTableAttachment;
 import static ru.at.rest.api.utils.PropertyLoader.loadValuePropertyOrVariableOrDefault;
 import static ru.at.rest.api.utils.PropertyLoader.tryLoadProperty;
-import static ru.at.rest.api.utils.Utils.createDataTableAttachment;
 import static ru.at.rest.api.utils.Utils.getDataTableFromFile;
 
 @Log4j2
@@ -122,7 +123,7 @@ public class ResponseSpecBuilder {
             case SPEC: {
                 ResponseSpecData responseSpecData = getResponseSpec(key);
                 log.info(format("ResponseSpecification %s:\n%s", key, responseSpecData.toDataTable()));
-                createDataTableAttachment("ResponseSpecification " + key, responseSpecData);
+                createDataTableAttachment(Allure.getLifecycle(),"ResponseSpecification " + key, responseSpecData);
                 response.spec(createResponseSpec(responseSpecData));
                 break;
             }

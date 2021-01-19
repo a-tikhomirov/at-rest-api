@@ -3,15 +3,21 @@ package ru.at.rest.api.steps;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ru.И;
+import io.cucumber.plugin.event.DataTableArgument;
+import io.qameta.allure.Allure;
 import io.restassured.response.Response;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import ru.at.rest.api.cucumber.CoreScenario;
 import ru.at.rest.api.dto.response.ResponseSpecBuilder;
 import ru.at.rest.api.dto.response.ResponseSpecData;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
+import static ru.at.rest.api.cucumber.plugin.AllureCucumber6Jvm.createDataTableAttachment;
 import static ru.at.rest.api.dto.response.ResponseSpecBuilder.createResponseSpec;
 import static ru.at.rest.api.dto.response.ResponseSpecBuilder.getResponseSpecDataFromTable;
 import static ru.at.rest.api.utils.Utils.attachErrorMessage;
@@ -105,13 +111,33 @@ public class ResponseSteps {
         if (dataTable.isEmpty()) {
             throw new IllegalArgumentException("Отсутсвуют данные для сохранения элементов Response");
         }
+        List<List<String>> savedValues = new ArrayList<>();
         for (List<String> responseParam : dataTable.asLists()) {
             ResponseSpecBuilder.ResponsePart responsePart = ResponseSpecBuilder.ResponsePart.get(responseParam.get(0).toUpperCase());
             String key = responseParam.get(1);
             String varName = responseParam.get(2);
             log.info(format("Сохранения элемента Response: [%s]:[%s] в переменную с именем [%s]", responsePart, key, varName));
 
-            coreScenario.getEnvironment().setVar(varName, getResponseElementValue(response, responsePart, key));
+            Object value = getResponseElementValue(response, responsePart, key);
+            savedValues.add(Arrays.asList(responsePart.toString(), key, varName, String.valueOf(value)));
+            coreScenario.getEnvironment().setVar(varName, value);
+        }
+        log.info("Результат сохранения:\n" + DataTable.create(savedValues));
+        createDataTableAttachment(Allure.getLifecycle(), "Результат сохранения", new SavedValuesDataTable(savedValues));
+    }
+
+    @AllArgsConstructor
+    static class SavedValuesDataTable implements DataTableArgument {
+        private final List<List<String>> content;
+
+        @Override
+        public List<List<String>> cells() {
+            return content;
+        }
+
+        @Override
+        public int getLine() {
+            return 0;
         }
     }
 

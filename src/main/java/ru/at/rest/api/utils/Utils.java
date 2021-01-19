@@ -1,8 +1,6 @@
 package ru.at.rest.api.utils;
 
 import io.cucumber.datatable.DataTable;
-import io.cucumber.plugin.event.DataTableArgument;
-import io.qameta.allure.Allure;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.Method;
 import io.restassured.specification.FilterableRequestSpecification;
@@ -10,11 +8,9 @@ import io.restassured.specification.RequestSender;
 import lombok.extern.log4j.Log4j2;
 import ru.at.rest.api.cucumber.CoreScenario;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -108,31 +104,4 @@ public class Utils {
         fail(message);
     }
 
-    /**
-     * Прикрепляет к текущему шагу заданную таблицу dataTableArgument для отчета allure
-     *
-     * @param name                  имя для отображения прикрепленной таблицы
-     * @param dataTableArgument     таблица для прикрепления к шагу отчета
-     */
-    public static void createDataTableAttachment(String name, final DataTableArgument dataTableArgument) {
-        final List<List<String>> rowsInTable = dataTableArgument.cells();
-        final StringBuilder dataTableCsv = new StringBuilder();
-        for (List<String> columns : rowsInTable) {
-            if (!columns.isEmpty()) {
-                for (int i = 0; i < columns.size(); i++) {
-                    if (i == columns.size() - 1) {
-                        dataTableCsv.append(columns.get(i));
-                    } else {
-                        dataTableCsv.append(columns.get(i));
-                        dataTableCsv.append('\t');
-                    }
-                }
-                dataTableCsv.append('\n');
-            }
-        }
-        final String attachmentSource = Allure.getLifecycle()
-                .prepareAttachment(name, "text/tab-separated-values", "csv");
-        Allure.getLifecycle().writeAttachment(attachmentSource,
-                new ByteArrayInputStream(dataTableCsv.toString().getBytes(StandardCharsets.UTF_8)));
-    }
 }

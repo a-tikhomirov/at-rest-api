@@ -171,7 +171,7 @@ public class AllureCucumber6Jvm implements ConcurrentEventListener {
             final StepArgument stepArgument = pickleStep.getStep().getArgument();
             if (stepArgument instanceof DataTableArgument) {
                 final DataTableArgument dataTableArgument = (DataTableArgument) stepArgument;
-                createDataTableAttachment(dataTableArgument);
+                createDataTableAttachment(lifecycle, "Data table", dataTableArgument);
             }
         } else if (event.getTestStep() instanceof HookTestStep) {
             initHook((HookTestStep) event.getTestStep());
@@ -327,7 +327,7 @@ public class AllureCucumber6Jvm implements ConcurrentEventListener {
         }
     }
 
-    private void createDataTableAttachment(final DataTableArgument dataTableArgument) {
+    public static void createDataTableAttachment(AllureLifecycle lifecycle, String name, final DataTableArgument dataTableArgument) {
         final List<List<String>> rowsInTable = dataTableArgument.cells();
         final StringBuilder dataTableCsv = new StringBuilder();
         for (List<String> columns : rowsInTable) {
@@ -344,7 +344,7 @@ public class AllureCucumber6Jvm implements ConcurrentEventListener {
             }
         }
         final String attachmentSource = lifecycle
-                .prepareAttachment("Data table", "text/tab-separated-values", "csv");
+                .prepareAttachment(name, "text/tab-separated-values", "csv");
         lifecycle.writeAttachment(attachmentSource,
                 new ByteArrayInputStream(dataTableCsv.toString().getBytes(StandardCharsets.UTF_8)));
     }
