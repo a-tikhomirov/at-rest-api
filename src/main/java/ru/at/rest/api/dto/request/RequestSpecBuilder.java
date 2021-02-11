@@ -26,10 +26,39 @@ public class RequestSpecBuilder {
     /**
      * Хранилище заготовок для RequestSpecification в формате Имя, {@link RequestSpecData}
      */
-    private static final ConcurrentHashMap<String, RequestSpecData> requestSpecs;
+    private static ConcurrentHashMap<String, RequestSpecData> requestSpecs;
 
-    static {
-        requestSpecs = new ConcurrentHashMap<>(buildRequestSpecsFromResources());
+    public static void initRequestSpecs(Map<String, RequestSpecData> specs) {
+        requestSpecs = new ConcurrentHashMap<>(specs);
+    }
+
+    /**
+     * Создает пулл заготовок под RequestSpecification из файлов, находящихся по
+     * пути, указанному в файле свойств prebuild.request.specs
+     * Если свойство prebuild.request.specs не указано - возвращает null
+     *
+     * @return      карта заготовок под RequestSpecification в формате Map<Имя заготовки, Заготовка>
+     */
+    public static Map<String, RequestSpecData> buildRequestSpecsFromResources() {
+        log.debug("Проверка на необходимость подготовки RequestSpecification");
+        String path = tryLoadProperty("prebuild.request.specs");
+        Map<String, RequestSpecData> requestSpecDataMap = null;
+        if (path != null) {
+            log.debug("Установлен параметр prebuild.request.specs = " + path);
+            File[] requestFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
+            requestSpecDataMap = new HashMap<>();
+            for (File requestFile : requestFiles) {
+                log.debug("Подготовка RequestSpecification из файла: " + requestFile.getPath());
+                RequestSpecData requestSpecData = getRequestSpecDataFromTable(getDataTableFromFile(requestFile));
+                if (requestSpecData != null) {
+                    requestSpecDataMap.put(
+                            requestFile.getName(),
+                            requestSpecData
+                    );
+                }
+            }
+        }
+        return requestSpecDataMap;
     }
 
     /**
@@ -148,35 +177,6 @@ public class RequestSpecBuilder {
                 throw new IllegalArgumentException(format("Не задано поведение для части запроса %s", requestPart));
             }
         }
-    }
-
-    /**
-     * Создает пулл заготовок под RequestSpecification из файлов, находящихся по
-     * пути, указанному в файле свойств prebuild.request.specs
-     * Если свойство prebuild.request.specs не указано - возвращает null
-     *
-     * @return      карта заготовок под RequestSpecification в формате Map<Имя заготовки, Заготовка>
-     */
-    private static Map<String, RequestSpecData> buildRequestSpecsFromResources() {
-        log.debug("Проверка на необходимость подготовки RequestSpecification");
-        String path = tryLoadProperty("prebuild.request.specs");
-        Map<String, RequestSpecData> requestSpecDataMap = null;
-        if (path != null) {
-            log.debug("Установлен параметр prebuild.request.specs = " + path);
-            File[] requestFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
-            requestSpecDataMap = new HashMap<>();
-            for (File requestFile : requestFiles) {
-                log.debug("Подготовка RequestSpecification из файла: " + requestFile.getPath());
-                RequestSpecData requestSpecData = getRequestSpecDataFromTable(getDataTableFromFile(requestFile));
-                if (requestSpecData != null) {
-                    requestSpecDataMap.put(
-                            requestFile.getName(),
-                            requestSpecData
-                    );
-                }
-            }
-        }
-        return requestSpecDataMap;
     }
 
     public enum RequestPart {

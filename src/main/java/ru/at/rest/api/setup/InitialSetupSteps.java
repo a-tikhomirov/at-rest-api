@@ -12,7 +12,9 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.ThreadContext;
 import ru.at.rest.api.cucumber.CoreEnvironment;
 import ru.at.rest.api.cucumber.CoreScenario;
+import ru.at.rest.api.dto.request.RequestSpecBuilder;
 import ru.at.rest.api.dto.request.RequestSpecData;
+import ru.at.rest.api.dto.response.ResponseSpecBuilder;
 import ru.at.rest.api.dto.response.ResponseSpecData;
 
 import java.nio.charset.StandardCharsets;
@@ -25,7 +27,8 @@ import static ru.at.rest.api.dto.request.RequestSpecBuilder.getRequestSpec;
 import static ru.at.rest.api.dto.response.ResponseSpecBuilder.createResponseSpec;
 import static ru.at.rest.api.dto.response.ResponseSpecBuilder.getResponseSpec;
 import static ru.at.rest.api.utils.PropertyLoader.tryLoadProperty;
-import static ru.at.rest.api.utils.Utils.*;
+import static ru.at.rest.api.utils.Utils.getCurrentDateTimeAsString;
+import static ru.at.rest.api.utils.Utils.readFile;
 
 @Log4j2
 public class InitialSetupSteps {
@@ -48,6 +51,12 @@ public class InitialSetupSteps {
     }
 
     @Before(order = 1)
+    public void initSpecBuilders() {
+        RequestSpecBuilder.initRequestSpecs(RequestSpecBuilder.buildRequestSpecsFromResources());
+        ResponseSpecBuilder.initResponseSpecs(ResponseSpecBuilder.buildResponseSpecsFromResources());
+    }
+
+    @Before(order = 2)
     @Step("Настройка RestAssured")
     public void configureRestAssured(Scenario scenario) {
         log.info("Установка общих параметров RestAssured");
