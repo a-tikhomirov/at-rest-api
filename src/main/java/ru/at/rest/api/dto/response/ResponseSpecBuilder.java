@@ -35,37 +35,8 @@ public class ResponseSpecBuilder {
      */
     private static ConcurrentHashMap<String, ResponseSpecData> responseSpecs;
 
-    public static void initResponseSpecs(Map<String, ResponseSpecData> specs) {
-        responseSpecs = new ConcurrentHashMap<>(specs);
-    }
-
-    /**
-     * Создает пулл заготовок под ResponseSpecification из файлов, находящихся по
-     * пути, указанному в файле свойств prebuild.response.specs
-     * Если свойство pprebuild.response.specs не указано - возвращает null
-     *
-     * @return      карта заготовок под ResponseSpecification в формате Map<Имя заготовки, Заготовка>
-     */
-    public static Map<String, ResponseSpecData> buildResponseSpecsFromResources() {
-        log.debug("Проверка на необходимость подготовки ResponseSpecification");
-        String path = tryLoadProperty("prebuild.response.specs");
-        Map<String, ResponseSpecData> responseSpecDataMap = null;
-        if (path != null) {
-            log.debug("Установлен параметр prebuild.response.specs = " + path);
-            List<String> responseFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
-            responseSpecDataMap = new HashMap<>();
-            for (String responseFile : responseFiles) {
-                log.debug("Подготовка ResponseSpecification из файла: " + responseFile);
-                ResponseSpecData responseSpecData = getResponseSpecDataFromTable(getDataTableFromFile(path, responseFile));
-                if (responseSpecData != null) {
-                    responseSpecDataMap.put(
-                            responseFile,
-                            responseSpecData
-                    );
-                }
-            }
-        }
-        return responseSpecDataMap;
+    static {
+        responseSpecs = new ConcurrentHashMap<>(buildResponseSpecsFromResources());
     }
 
     /**
@@ -241,6 +212,35 @@ public class ResponseSpecBuilder {
                 throw new IllegalArgumentException(format("Не задано поведение типа %s", type));
         }
         return mapper;
+    }
+
+    /**
+     * Создает пулл заготовок под ResponseSpecification из файлов, находящихся по
+     * пути, указанному в файле свойств prebuild.response.specs
+     * Если свойство pprebuild.response.specs не указано - возвращает null
+     *
+     * @return      карта заготовок под ResponseSpecification в формате Map<Имя заготовки, Заготовка>
+     */
+    public static Map<String, ResponseSpecData> buildResponseSpecsFromResources() {
+        log.debug("Проверка на необходимость подготовки ResponseSpecification");
+        String path = tryLoadProperty("prebuild.response.specs");
+        Map<String, ResponseSpecData> responseSpecDataMap = null;
+        if (path != null) {
+            log.debug("Установлен параметр prebuild.response.specs = " + path);
+            List<String> responseFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
+            responseSpecDataMap = new HashMap<>();
+            for (String responseFile : responseFiles) {
+                log.debug("Подготовка ResponseSpecification из файла: " + responseFile);
+                ResponseSpecData responseSpecData = getResponseSpecDataFromTable(getDataTableFromFile(path, responseFile));
+                if (responseSpecData != null) {
+                    responseSpecDataMap.put(
+                            responseFile,
+                            responseSpecData
+                    );
+                }
+            }
+        }
+        return responseSpecDataMap;
     }
 
     public enum ResponsePart {
