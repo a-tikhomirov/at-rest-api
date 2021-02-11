@@ -103,7 +103,8 @@ public class ResourceLoader {
      * @return          список файлов по указанному пути в виде массива объектов класса File
      */
     public synchronized File[] getResourceFolderFiles (String path) {
-        URL url = ClassLoader.getSystemClassLoader().getResource(path);
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL url = classLoader.getResource(path);
         if (url == null) {
             throw new IllegalArgumentException("Не найден путь: " + path);
         }
