@@ -35,7 +35,7 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="WARN" additivity="false">
+        <Root level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>
         </Root>
