@@ -1,17 +1,18 @@
 package ru.at.rest.api.utils;
 
 import com.google.common.io.ByteStreams;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 public class ResourceLoader {
 
@@ -86,14 +87,32 @@ public class ResourceLoader {
      * @param file      файл для чтения
      * @return          считанный файл в виде списка строк
      */
-    public synchronized List<String> getFileAsList(File file) {
-        List<String> lines = null;
-        try {
-            lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+    public synchronized List<String> getFileAsList(String path, String file) {
+        List<String> lines = new ArrayList<>();
+        try (InputStreamReader streamReader =
+                     new InputStreamReader(getFileFromResourceAsStream(path + "/" + file), StandardCharsets.UTF_8);
+             BufferedReader reader = new BufferedReader(streamReader)) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         return lines;
+    }
+
+    private InputStream getFileFromResourceAsStream(String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("file not found! " + fileName);
+        } else {
+            return inputStream;
+        }
     }
 
     /**
@@ -102,13 +121,15 @@ public class ResourceLoader {
      * @param path      путь в парке resources
      * @return          список файлов по указанному пути в виде массива объектов класса File
      */
-    public synchronized File[] getResourceFolderFiles (String path) {
+    public synchronized List<String> getResourceFolderFiles (String path) {
         ClassLoader classLoader = getClass().getClassLoader();
-        URL url = classLoader.getResource(path);
-        if (url == null) {
-            throw new IllegalArgumentException("Не найден путь: " + path);
+        List<String> fileNames = new ArrayList<>();
+        try {
+            fileNames = IOUtils.readLines(Objects.requireNonNull(classLoader.getResourceAsStream(path)), Charsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return new File(url.getPath()).listFiles();
+        return fileNames;
     }
 
 }

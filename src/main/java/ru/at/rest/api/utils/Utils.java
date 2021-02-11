@@ -8,7 +8,6 @@ import io.restassured.specification.RequestSender;
 import lombok.extern.log4j.Log4j2;
 import ru.at.rest.api.cucumber.CoreScenario;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -82,9 +81,9 @@ public class Utils {
      * @param file          файл для формирования DataTable
      * @return              объект класса DataTable
      */
-    public static DataTable getDataTableFromFile(File file) {
+    public static DataTable getDataTableFromFile(String path, String file) {
         List<List<String>> content = new ArrayList<>();
-        for(String line:ResourceLoader.getInstance().getFileAsList(file)) {
+        for(String line: ResourceLoader.getInstance().getFileAsList(path, file)) {
             content.add(Arrays.stream(line.split("\\|"))
                     .map(s -> s = s.trim())
                     .collect(Collectors.toList())

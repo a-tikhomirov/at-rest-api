@@ -7,9 +7,9 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.log4j.Log4j2;
 import ru.at.rest.api.utils.ResourceLoader;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,19 +45,14 @@ public class RequestSpecBuilder {
         Map<String, RequestSpecData> requestSpecDataMap = null;
         if (path != null) {
             log.debug("Установлен параметр prebuild.request.specs = " + path);
-            File[] requestFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
-            if (requestFiles.length != 0) {
-                StringBuilder sb = new StringBuilder();
-                Arrays.stream(requestFiles).forEach(file -> sb.append(file.getAbsolutePath()).append("\n"));
-                log.debug("Список файлов специцикаций:\n" + sb.toString());
-            }
+            List<String> requestFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
             requestSpecDataMap = new HashMap<>();
-            for (File requestFile : requestFiles) {
-                log.debug("Подготовка RequestSpecification из файла: " + requestFile.getPath());
-                RequestSpecData requestSpecData = getRequestSpecDataFromTable(getDataTableFromFile(requestFile));
+            for (String requestFile : requestFiles) {
+                log.debug("Подготовка RequestSpecification из файла: " + requestFile);
+                RequestSpecData requestSpecData = getRequestSpecDataFromTable(getDataTableFromFile(path, requestFile));
                 if (requestSpecData != null) {
                     requestSpecDataMap.put(
-                            requestFile.getName(),
+                            requestFile,
                             requestSpecData
                     );
                 }

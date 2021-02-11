@@ -11,9 +11,9 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import ru.at.rest.api.utils.ResourceLoader;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -52,14 +52,14 @@ public class ResponseSpecBuilder {
         Map<String, ResponseSpecData> responseSpecDataMap = null;
         if (path != null) {
             log.debug("Установлен параметр prebuild.response.specs = " + path);
-            File[] responseFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
+            List<String> responseFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
             responseSpecDataMap = new HashMap<>();
-            for (File responseFile : responseFiles) {
-                log.debug("Подготовка ResponseSpecification из файла: " + responseFile.getPath());
-                ResponseSpecData responseSpecData = getResponseSpecDataFromTable(getDataTableFromFile(responseFile));
+            for (String responseFile : responseFiles) {
+                log.debug("Подготовка ResponseSpecification из файла: " + responseFile);
+                ResponseSpecData responseSpecData = getResponseSpecDataFromTable(getDataTableFromFile(path, responseFile));
                 if (responseSpecData != null) {
                     responseSpecDataMap.put(
-                            responseFile.getName(),
+                            responseFile,
                             responseSpecData
                     );
                 }
