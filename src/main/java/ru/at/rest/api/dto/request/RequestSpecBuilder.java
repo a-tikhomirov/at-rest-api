@@ -46,6 +46,11 @@ public class RequestSpecBuilder {
         if (path != null) {
             log.debug("Установлен параметр prebuild.request.specs = " + path);
             File[] requestFiles = ResourceLoader.getInstance().getResourceFolderFiles(path);
+            if (requestFiles.length != 0) {
+                StringBuilder sb = new StringBuilder();
+                Arrays.stream(requestFiles).forEach(file -> sb.append(file.getAbsolutePath()).append("\n"));
+                log.debug("Список файлов специцикаций:\n" + sb.toString());
+            }
             requestSpecDataMap = new HashMap<>();
             for (File requestFile : requestFiles) {
                 log.debug("Подготовка RequestSpecification из файла: " + requestFile.getPath());
